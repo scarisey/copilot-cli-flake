@@ -44,6 +44,9 @@ jobs:
       - name: Update flake inputs
         run: |
           nix flake update --commit-lock-file --accept-flake-config
+      - name: Update version of Copilot CLI
+        run: |
+          nix develop .#devShells.x86_64-linux.updateShell --command './update.sh'
       - name: Push changes to remote
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
