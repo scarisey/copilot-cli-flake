@@ -15,6 +15,12 @@
       });
       devShells = forAllSystems ({system,pkgs}:
         {
+          updateShell = pkgs.mkShell {
+            packages = [
+              pkgs.nodejs_latest
+              pkgs.jq
+            ];
+          };
           default = pkgs.mkShell {
             packages = [
               pkgs.nodejs_latest
