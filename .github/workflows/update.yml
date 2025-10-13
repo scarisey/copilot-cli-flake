@@ -1,0 +1,54 @@
+name: "Update flake inputs"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * 4" # Every week on Thursday - before by auto update of nixos.
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      NIXPKGS_ALLOW_BROKEN: "1"
+      NIXPKGS_ALLOW_UNFREE: "1"
+      NIXPKGS_ALLOW_INSECURE: "1"
+      NIX_CONFIG: |
+        experimental-features = nix-command flakes
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      GIT_AUTHOR_NAME: github-actions[bot]
+      GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+      GIT_COMMITTER_NAME: github-actions[bot]
+      GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: mount Nix store on larger partition
+        # on the Linux runner `/` doesn't have enough space, but there's a `/mnt` which does.
+        if: runner.os == 'Linux'
+        run: |
+          sudo mkdir /nix /mnt/nix
+          sudo mount --bind /mnt/nix /nix
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v15
+        with:
+          name: scarisey-public
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Prepare update branch
+        run: |
+          git remote remove origin
+          git remote add origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git checkout -b ci/auto_update
+      - name: Update flake inputs
+        run: |
+          nix flake update --commit-lock-file --accept-flake-config
+      - name: Push changes to remote
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push --force --set-upstream origin ci/auto_update
+          gh pr create --title "CI:Auto Update" --body "Automatic update from CI" || true
+          gh pr merge --rebase --auto
+          gh workflow run 197522097 --ref 'ci/auto_update'

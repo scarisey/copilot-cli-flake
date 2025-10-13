@@ -1,0 +1,56 @@
+name: "Nix flake check"
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+      - "!main"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      NIXPKGS_ALLOW_BROKEN: "1"
+      NIXPKGS_ALLOW_UNFREE: "1"
+      NIXPKGS_ALLOW_INSECURE: "1"
+      NIX_CONFIG: |
+        experimental-features = nix-command flakes
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: mount Nix store on larger partition
+        # on the Linux runner `/` doesn't have enough space, but there's a `/mnt` which does.
+        if: runner.os == 'Linux'
+        run: |
+          sudo mkdir /nix /mnt/nix
+          sudo mount --bind /mnt/nix /nix
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - uses: cachix/cachix-action@v15
+        with:
+          name: scarisey-public
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Build default package
+        run: |
+          nix build --accept-flake-config .#packages.x86_64-linux.default
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      - name: Check OK
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/scarisey/copilot-cli-flake/check-runs \
+            -f "name=check_ok" -f "head_sha=$(git rev-parse HEAD)" -f "status=completed" -f "conclusion=success"
