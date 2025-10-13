@@ -47,6 +47,7 @@ jobs:
       - name: Update version of Copilot CLI
         run: |
           nix develop .#devShells.x86_64-linux.updateShell --command './update.sh'
+          git add versions.json package-lock.json
           git commit -m "chore:update copilot CLI version"
       - name: Push changes to remote
         env:
