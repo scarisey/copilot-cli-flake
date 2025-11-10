@@ -1,7 +1,8 @@
 {
-  buildNpmPackage,
+  stdenv,
   fetchurl,
-  pkgs
+  nodejs,
+  makeWrapper
 }:
 let
   versions = builtins.fromJSON (builtins.readFile ./versions.json);
@@ -9,23 +10,27 @@ let
   version = versions.version;
 in
 
-buildNpmPackage rec {
+stdenv.mkDerivation rec {
   inherit pname version;
-
-  dontBuild = true;
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@github/copilot/-/copilot-${version}.tgz";
     sha256 = versions.sha256;
   };
 
-  postPatch = ''
-    cp ${./package-lock.json} ./package-lock.json
+  nativeBuildInputs = [ makeWrapper ];
+
+  dontBuild = true;
+
+  installPhase = ''
+    runHook preInstall
+    mkdir -p $out/lib/node_modules/@github/copilot
+    cp -r . $out/lib/node_modules/@github/copilot
+    mkdir -p $out/bin
+    makeWrapper ${nodejs}/bin/node $out/bin/copilot \
+      --add-flags "$out/lib/node_modules/@github/copilot/index.js"
+    runHook postInstall
   '';
-
-  npmDepsHash = versions.npmDepsHash;
-
-  nativeBuildInputs = [ pkgs.nodejs ];
 
   meta = {
     description = "Github Copilot CLI";
