@@ -6,10 +6,6 @@ A Nix flake that packages the [GitHub Copilot CLI](https://docs.github.com/en/co
 
 This repository provides a Nix flake that packages the GitHub Copilot CLI (version 0.0.330), allowing you to easily install and use GitHub Copilot in your terminal on NixOS systems or through Home Manager.
 
-## TODO
-
-Automatic updates of this flake.
-
 ## Prerequisites
 
 - Nix with flakes enabled
