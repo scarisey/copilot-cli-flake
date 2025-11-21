@@ -4,11 +4,8 @@ A Nix flake that packages the [GitHub Copilot CLI](https://docs.github.com/en/co
 
 ## Overview
 
-This repository provides a Nix flake that packages the GitHub Copilot CLI (version 0.0.330), allowing you to easily install and use GitHub Copilot in your terminal on NixOS systems or through Home Manager.
-
-## TODO
-
-Automatic updates of this flake.
+This repository provides a Nix flake that packages the GitHub Copilot CLI, allowing you to easily install and use GitHub Copilot in your terminal on NixOS systems or through Home Manager.
+This flake is updated weekly with the last version of Copilot.
 
 ## Prerequisites
 
@@ -162,8 +159,8 @@ This flake supports the following systems:
 After installation, you'll need to authenticate with GitHub:
 
 ```bash
-# Start the authentication process
-copilot auth login
+# Start the authentication process with Github CLI
+gh auth login
 
 # Follow the prompts to authenticate with your GitHub account
 ```
@@ -176,14 +173,12 @@ Once installed and authenticated, you can use GitHub Copilot CLI:
 # Get help
 copilot --help
 
-# Ask Copilot to explain a command
-copilot explain "ls -la"
+# Just start interactive mode
+copilot
 
-# Ask Copilot to suggest a command
-copilot suggest "find all .js files modified in the last week"
+# Execute a prompt in non-interactive mode
+copilot -p "Fix the bug in main.js" --allow-all-tools
 
-# Use Copilot in chat mode
-copilot chat
 ```
 
 ## Development
@@ -192,9 +187,11 @@ copilot chat
 
 To update to a newer version of the GitHub Copilot CLI:
 
+Use `update.sh` script that will do the following :
+
 1. Update the `version` in `package.nix`
 2. Update the `url` and `sha256` in the `fetchurl` call
-3. Update the `npmDepsHash` (you may need to set it to an empty string first and let Nix tell you the correct hash)
+3. Update the `npmDepsHash`
 
 ### Local Development
 
