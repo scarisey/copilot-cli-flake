@@ -35,5 +35,6 @@ stdenv.mkDerivation rec {
   meta = {
     description = "Github Copilot CLI";
     homepage = "https://github.com";
+    mainProgram = "copilot";
   };
 }
