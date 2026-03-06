@@ -48,7 +48,7 @@ jobs:
         run: |
           nix develop .#devShells.x86_64-linux.updateShell --command './update.sh'
           git add versions.json package-lock.json
-          git commit -m "chore:update copilot CLI version"
+          git diff --cached --quiet || git commit -m "chore:update copilot CLI version"
       - name: Push changes to remote
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,4 +56,4 @@ jobs:
           git push --force --set-upstream origin ci/auto_update
           gh pr create --title "CI:Auto Update" --body "Automatic update from CI" || true
           gh pr merge --rebase --auto --delete-branch
-          gh workflow run 197522097 --ref 'ci/auto_update'
+          gh workflow run check.yml --ref 'ci/auto_update'
