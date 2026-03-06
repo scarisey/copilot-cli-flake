@@ -22,17 +22,17 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: mount Nix store on larger partition
         # on the Linux runner `/` doesn't have enough space, but there's a `/mnt` which does.
         if: runner.os == 'Linux'
         run: |
           sudo mkdir /nix /mnt/nix
           sudo mount --bind /mnt/nix /nix
-      - uses: cachix/install-nix-action@v30
+      - uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@v16
         with:
           name: scarisey-public
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
