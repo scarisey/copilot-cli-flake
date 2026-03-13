@@ -1,5 +1,6 @@
 name: "Report check status and push to Cachix"
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["Nix flake check"]
     types: [completed]
