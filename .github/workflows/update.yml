@@ -56,4 +56,4 @@ jobs:
           git push --force --set-upstream origin ci/auto_update
           gh pr create --title "CI:Auto Update" --body "Automatic update from CI" || true
           gh pr merge --rebase --auto --delete-branch
-          gh workflow run check.yml --ref 'ci/auto_update'
+          gh workflow run report-and-push.yml --ref 'ci/auto_update'

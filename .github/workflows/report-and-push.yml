@@ -1,9 +1,9 @@
 name: "Report check status and push to Cachix"
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Nix flake check"]
-    types: [completed]
+  push:
+    branches:
+      - "**"
 
 jobs:
   report-and-push:
@@ -43,7 +43,6 @@ jobs:
           app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
       - name: Check OK
-        if: github.event.workflow_run.conclusion == 'success'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
@@ -51,8 +50,8 @@ jobs:
             --method POST \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/scarisey/copilot-cli-flake/check-runs \
+            /repos/${{ github.repository }}/check-runs \
             -f "name=check_ok" \
-            -f "head_sha=${{ github.event.workflow_run.head_sha }}" \
+            -f "head_sha=${{ github.sha }}" \
             -f "status=completed" \
             -f "conclusion=success"
