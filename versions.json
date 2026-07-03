@@ -1,5 +1,7 @@
 {
   "version": "1.0.68",
-  "sha256": "sha256-F3b9YpyQPTOUZFX+HuU+vpxnIjcHaq3ZmgcI2dii8WY=",
-  "npmDepsHash": ""
+  "sha256Linux_x64": "sha256-Ag5pyCUYMfpCZIvrSqcl5Km+rSsKDrmQmmeBl+14944=",
+  "sha256Linux_arm64": "sha256-zMADf6iBo5Cdc7HyiVtuqH8RSxfsceb1GuNqds7Xjjw=",
+  "sha256Darwin_x64": "sha256-55AiBXHvVG+C1p9mipE6SP3URB5pRYQTkx/xavYobJ0=",
+  "sha256Darwin_arm64": "sha256-sXFYxUVQ9UtXgAQOQZIBn8zaTDtRtW9hfnrn9pzzegw="
 }
