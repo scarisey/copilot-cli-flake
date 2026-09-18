@@ -7,6 +7,8 @@ A Nix flake that packages the [GitHub Copilot CLI](https://docs.github.com/en/co
 This repository provides a Nix flake that packages the GitHub Copilot CLI, allowing you to easily install and use GitHub Copilot in your terminal on NixOS systems or through Home Manager.
 This flake is updated weekly with the last version of Copilot.
 
+It also packages [Headroom](https://github.com/headroomlabs-ai/headroom), the token compressor for LLM applications, as a separate `headroom` output.
+
 ## Prerequisites
 
 - Nix with flakes enabled
@@ -28,6 +30,10 @@ nix develop
 
 # The copilot command should now be available
 copilot --help
+
+# 'copilot-hr' is also available: it's 'copilot' transparently wrapped
+# through the Headroom proxy for token compression.
+copilot-hr --help
 ```
 
 ### Building the Package
@@ -39,6 +45,59 @@ nix build
 ```
 
 The built package will be available in the `result` symlink.
+
+### Headroom (token compressor)
+
+This flake also builds [Headroom](https://github.com/headroomlabs-ai/headroom) as its own package output, using the official prebuilt `headroom-ai` PyPI wheel plus nixpkgs' `ast-grep` for the binary it shells out to (no plain pass-through of a `nixpkgs` package):
+
+```bash
+nix build .#headroom
+./result/bin/headroom --help
+```
+
+It's also included in the default development shell alongside `copilot`. The `proxy` extra (needed for `headroom proxy` / `headroom wrap <tool>`) is packaged too; only ML-only extras (e.g. the Kompress-v2-base prose model, some agent-specific wrappers) are left out and fail with a clear `ImportError` if invoked.
+
+### Wrapping Copilot CLI with Headroom
+
+This flake also exposes ready-to-use modules that install a `copilot` command transparently routed through the Headroom proxy (`headroom wrap copilot`), for NixOS, Home Manager and [devenv](https://devenv.sh):
+
+```nix
+# NixOS
+{
+  imports = [ copilot-cli.nixosModules.default ];
+  programs.copilotHeadroom.enable = true;
+}
+```
+
+```nix
+# Home Manager
+{
+  imports = [ copilot-cli.homeManagerModules.default ];
+  programs.copilotHeadroom.enable = true;
+}
+```
+
+```nix
+# devenv.nix
+{ inputs, ... }: {
+  imports = [ inputs.copilot-cli.devenvModules.default ];
+  copilotHeadroom.enable = true;
+}
+```
+
+All three share the same options:
+
+| Option           | Default    | Description                                                            |
+| ---------------- | ---------- | ------------------------------------------------------------------------ |
+| `enable`          | `false`    | Install the wrapped `copilot` command.                                   |
+| `copilotPackage`  | this flake's `default` package | The GitHub Copilot CLI package to wrap.                       |
+| `headroomPackage` | this flake's `headroom` package | The Headroom package used to run the proxy.                  |
+| `wrapperName`     | `"copilot"` | Command name installed on PATH; set to e.g. `"copilot-hr"` to keep the plain `copilot` available too. |
+| `port`            | `8787`     | Local port used by the Headroom proxy.                                   |
+| `subscription`    | `false`    | Pass `--subscription` (route via your GitHub Copilot subscription instead of a BYOK provider key). |
+| `extraWrapArgs`   | `[ ]`      | Extra arguments forwarded to `headroom wrap copilot` (e.g. `[ "--backend" "anyllm" ]`). |
+
+The wrapper always resolves the real `copilot` binary first (it prepends `copilotPackage`'s `bin` directory to `PATH`), so it's safe even when `wrapperName` is `"copilot"` itself — it cannot recurse into itself.
 
 ## Installation Methods
 
