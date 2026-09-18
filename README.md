@@ -57,23 +57,15 @@ nix build .#headroom
 
 It's also included in the default development shell alongside `copilot`. The `proxy` extra (needed for `headroom proxy` / `headroom wrap <tool>`) is packaged too; only ML-only extras (e.g. the Kompress-v2-base prose model, some agent-specific wrappers) are left out and fail with a clear `ImportError` if invoked.
 
-### Wrapping Copilot CLI with Headroom
+### Copilot CLI module, with optional Headroom wrapping
 
-This flake also exposes ready-to-use modules that install a `copilot` command transparently routed through the Headroom proxy (`headroom wrap copilot`), for NixOS, Home Manager and [devenv](https://devenv.sh):
-
-```nix
-# NixOS
-{
-  imports = [ copilot-cli.nixosModules.default ];
-  programs.copilotHeadroom.enable = true;
-}
-```
+This flake exposes ready-to-use modules, for NixOS, Home Manager and [devenv](https://devenv.sh), built around a `programs.copilotCli` option namespace (`copilotCli` for devenv):
 
 ```nix
-# Home Manager
+# NixOS / Home Manager
 {
-  imports = [ copilot-cli.homeManagerModules.default ];
-  programs.copilotHeadroom.enable = true;
+  imports = [ copilot-cli.nixosModules.default ]; # or homeManagerModules.default
+  programs.copilotCli.enable = true;
 }
 ```
 
@@ -81,128 +73,95 @@ This flake also exposes ready-to-use modules that install a `copilot` command tr
 # devenv.nix
 { inputs, ... }: {
   imports = [ inputs.copilot-cli.devenvModules.default ];
-  copilotHeadroom.enable = true;
+  copilotCli.enable = true;
 }
 ```
 
-All three share the same options:
+`enable` alone installs the plain `copilot` command. Enabling the nested `headroom` option additionally (or instead) installs it wrapped through the [Headroom](https://github.com/headroomlabs-ai/headroom) proxy (`headroom wrap copilot`):
 
-| Option           | Default    | Description                                                            |
-| ---------------- | ---------- | ------------------------------------------------------------------------ |
-| `enable`          | `false`    | Install the wrapped `copilot` command.                                   |
-| `copilotPackage`  | this flake's `default` package | The GitHub Copilot CLI package to wrap.                       |
-| `headroomPackage` | this flake's `headroom` package | The Headroom package used to run the proxy.                  |
-| `wrapperName`     | `"copilot"` | Command name installed on PATH; set to e.g. `"copilot-hr"` to keep the plain `copilot` available too. |
-| `port`            | `8787`     | Local port used by the Headroom proxy.                                   |
-| `subscription`    | `false`    | Pass `--subscription` (route via your GitHub Copilot subscription instead of a BYOK provider key). |
-| `extraWrapArgs`   | `[ ]`      | Extra arguments forwarded to `headroom wrap copilot` (e.g. `[ "--backend" "anyllm" ]`). |
+```nix
+# Only the Headroom-wrapped copilot is installed; running `copilot`
+# transparently goes through Headroom.
+programs.copilotCli = {
+  enable = true;
+  headroom.enable = true;
+};
+```
 
-The wrapper always resolves the real `copilot` binary first (it prepends `copilotPackage`'s `bin` directory to `PATH`), so it's safe even when `wrapperName` is `"copilot"` itself — it cannot recurse into itself.
+```nix
+# Both are installed side by side: plain `copilot`, and `copilot-hr` wrapped
+# with Headroom.
+programs.copilotCli = {
+  enable = true;
+  headroom = {
+    enable = true;
+    wrapperName = "copilot-hr";
+  };
+};
+```
+
+Options:
+
+| Option                    | Default    | Description                                                            |
+| ------------------------- | ---------- | ------------------------------------------------------------------------ |
+| `enable`                  | `false`    | Install the GitHub Copilot CLI.                                          |
+| `package`                 | this flake's `default` package | The GitHub Copilot CLI package to install.                    |
+| `headroom.enable`         | `false`    | Additionally install `copilot` wrapped with Headroom.                    |
+| `headroom.package`        | this flake's `headroom` package | The Headroom package used to run the proxy.                  |
+| `headroom.wrapperName`    | `"copilot"` | Command name for the wrapper. When `"copilot"` (the default), it *replaces* the plain `copilot` command (only the wrapped binary is installed). Set to e.g. `"copilot-hr"` to install it *alongside* the plain `copilot` command instead. |
+| `headroom.port`           | `8787`     | Local port used by the Headroom proxy.                                   |
+| `headroom.subscription`   | `false`    | Pass `--subscription` (route via your GitHub Copilot subscription instead of a BYOK provider key). |
+| `headroom.extraWrapArgs`  | `[ ]`      | Extra arguments forwarded to `headroom wrap copilot` (e.g. `[ "--backend" "anyllm" ]`). |
+
+The wrapper always resolves the real `copilot` binary first (it prepends the plain package's `bin` directory to `PATH`), so it's safe even when `wrapperName` is `"copilot"` itself — it cannot recurse into itself.
 
 ## Installation Methods
 
-### Method 1: NixOS System Configuration
-
-Add this flake to your NixOS system configuration:
+All methods below need this flake added as an input first:
 
 ```nix
-# /etc/nixos/configuration.nix or flake.nix
+# flake.nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     copilot-cli.url = "github:scarisey/copilot-cli-flake";
-  };
-
-  outputs = { self, nixpkgs, copilot-cli, ... }: {
-    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux"; # or your system architecture
-      modules = [
-        {
-          environment.systemPackages = [
-            copilot-cli.packages.x86_64-linux.default # Adjust architecture as needed
-          ];
-        }
-        # ... your other modules
-      ];
-    };
-  };
-}
-```
-
-Then rebuild your system:
-
-```bash
-sudo nixos-rebuild switch
-```
-
-### Method 2: Home Manager (Standalone)
-
-If you're using Home Manager as a standalone tool:
-
-```nix
-# ~/.config/home-manager/home.nix
-{ config, pkgs, ... }:
-
-let
-  copilot-cli = builtins.getFlake "github:scarisey/copilot-cli-flake";
-in
-{
-  home.packages = [
-    copilot-cli.packages.${pkgs.system}.default
-  ];
-
-  # Rest of your Home Manager configuration...
-}
-```
-
-Apply the configuration:
-
-```bash
-home-manager switch
-```
-
-### Method 3: Home Manager (NixOS Module)
-
-If you're using Home Manager as a NixOS module:
-
-```nix
-# /etc/nixos/configuration.nix or your flake.nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # If also using Home Manager:
     home-manager.url = "github:nix-community/home-manager";
-    copilot-cli.url = "github:scarisey/copilot-cli-flake";
   };
-
-  outputs = { self, nixpkgs, home-manager, copilot-cli, ... }: {
-    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.users.yourusername = {
-            home.packages = [
-              copilot-cli.packages.x86_64-linux.default
-            ];
-          };
-        }
-        # ... your other modules
-      ];
-    };
-  };
+  # ...
 }
 ```
 
-### Method 4: Direct Installation with Nix Profile
+### Method 1 (Recommended): NixOS / Home Manager Module
 
-For a quick one-time installation:
+Use the `programs.copilotCli` module described in [Copilot CLI module, with optional Headroom wrapping](#copilot-cli-module-with-optional-headroom-wrapping) above — it handles installation and, optionally, Headroom wrapping for you:
+
+```nix
+{
+  imports = [ copilot-cli.nixosModules.default ]; # or homeManagerModules.default
+  programs.copilotCli.enable = true;
+}
+```
+
+This works the same way whether Home Manager is used standalone, as a NixOS module (`home-manager.users.<user> = { imports = [ copilot-cli.homeManagerModules.default ]; programs.copilotCli.enable = true; }`), or for devenv (`copilotCli.enable = true` with `devenvModules.default`).
+
+### Method 2: Direct Package Reference
+
+If you don't need the module (e.g. no Headroom wrapping, or you manage packages manually), reference the package output directly:
+
+```nix
+# NixOS: environment.systemPackages
+# Home Manager: home.packages
+[ copilot-cli.packages.${pkgs.system}.default ]
+```
+
+### Method 3: One-off Installation with Nix Profile
+
+For a quick, non-declarative installation:
 
 ```bash
-# Install directly from the flake
-nix profile install github:scarisey/copilot-cli-flake
-
-# Or install from a local clone
-nix profile install .
+nix profile install github:scarisey/copilot-cli-flake   # from the flake
+nix profile install .                                    # from a local clone
 ```
 
 ## Supported Architectures

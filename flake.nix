@@ -50,13 +50,13 @@
         }
       );
 
-      nixosModules.copilotHeadroom = ./modules/nixos.nix;
-      nixosModules.default = self.nixosModules.copilotHeadroom;
+      nixosModules.copilotCli = ./modules/nixos.nix;
+      nixosModules.default = self.nixosModules.copilotCli;
 
-      homeManagerModules.copilotHeadroom = ./modules/home-manager.nix;
-      homeManagerModules.default = self.homeManagerModules.copilotHeadroom;
+      homeManagerModules.copilotCli = ./modules/home-manager.nix;
+      homeManagerModules.default = self.homeManagerModules.copilotCli;
 
-      devenvModules.copilotHeadroom = ./modules/devenv.nix;
-      devenvModules.default = self.devenvModules.copilotHeadroom;
+      devenvModules.copilotCli = ./modules/devenv.nix;
+      devenvModules.default = self.devenvModules.copilotCli;
     };
 }

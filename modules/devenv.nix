@@ -1,32 +1,21 @@
-# devenv module: wraps GitHub Copilot CLI with the Headroom token
-# compressor inside a devenv shell.
+# devenv module: installs the GitHub Copilot CLI inside a devenv shell,
+# optionally wrapped with the Headroom token compressor.
 #
 # Usage (devenv.nix):
 #   { pkgs, inputs, ... }: {
 #     imports = [ inputs.copilot-cli-flake.devenvModules.default ];
-#     copilotHeadroom.enable = true;
+#     copilotCli.enable = true;
+#     copilotCli.headroom.enable = true; # optional
 #   }
 { config, lib, pkgs, ... }:
 let
-  cfg = config.copilotHeadroom;
+  cfg = config.copilotCli;
   wrapperLib = import ./lib.nix { inherit lib; };
 in
 {
-  options.copilotHeadroom = wrapperLib.mkOptions { inherit lib pkgs; };
+  options.copilotCli = wrapperLib.mkOptions { inherit lib pkgs; };
 
   config = lib.mkIf cfg.enable {
-    packages = [
-      (wrapperLib.mkWrapper {
-        inherit pkgs;
-        inherit (cfg)
-          copilotPackage
-          headroomPackage
-          wrapperName
-          port
-          subscription
-          extraWrapArgs
-          ;
-      })
-    ];
+    packages = wrapperLib.mkPackages { inherit pkgs cfg; };
   };
 }
