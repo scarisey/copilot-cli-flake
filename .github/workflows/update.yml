@@ -49,6 +49,11 @@ jobs:
           nix develop .#devShells.x86_64-linux.updateShell --command './update.sh'
           git add versions.json package-lock.json
           git diff --cached --quiet || git commit -m "chore:update copilot CLI version"
+      - name: Update version of Headroom
+        run: |
+          nix develop .#devShells.x86_64-linux.updateShell --command './update-headroom.sh'
+          git add headroom-versions.json
+          git diff --cached --quiet || git commit -m "chore:update headroom version"
       - name: Push changes to remote
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

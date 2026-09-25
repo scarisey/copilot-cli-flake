@@ -1,0 +1,11 @@
+{
+  "version": "0.38.0",
+  "urlLinux_x64": "https://files.pythonhosted.org/packages/ae/e8/2edff8f87f7035ee04e0a0316193aa11a71d80d82f86482ee0c6eae23303/headroom_ai-0.38.0-cp310-abi3-manylinux_2_28_x86_64.whl",
+  "sha256Linux_x64": "sha256-lB0fDAqgdUvUlZu6CyEtFVSlbBecBkPdeFKkudlcfbc=",
+  "urlLinux_arm64": "https://files.pythonhosted.org/packages/e3/df/be1259cc157ed69cb09eaac4fd64a107c798e6f952b018a60fe23af6889b/headroom_ai-0.38.0-cp310-abi3-manylinux_2_28_aarch64.whl",
+  "sha256Linux_arm64": "sha256-gGAwRUgwIsxMZceBIeseZq7fAuh2wtN43bvva5n+Wj8=",
+  "urlDarwin_x64": "https://files.pythonhosted.org/packages/49/6d/5eb789a65acfd36715b4a84685587b4de4b299f7d1f9302ae1eb26cca471/headroom_ai-0.38.0-cp310-abi3-macosx_10_12_x86_64.whl",
+  "sha256Darwin_x64": "sha256-rmoY9v0YXaJi3nFlYkD/qYDtCpmi6iCl6YERZuORzcs=",
+  "urlDarwin_arm64": "https://files.pythonhosted.org/packages/e3/01/930dd292696346c1c8351a2084dc3d8980623bde6e6d39fcd700dd4898ad/headroom_ai-0.38.0-cp310-abi3-macosx_11_0_arm64.whl",
+  "sha256Darwin_arm64": "sha256-RWumvduoJyZykfykhDcoyKrV+2brlh/2gEqya4Q5iwM="
+}
