@@ -1,11 +1,11 @@
 {
-  "version": "0.40.0",
-  "urlLinux_x64": "https://files.pythonhosted.org/packages/03/1c/383f4a2d33ad18d40869037ca6221e1db24bc4da5e92befe70793220b138/headroom_ai-0.40.0-cp310-abi3-manylinux_2_28_x86_64.whl",
-  "sha256Linux_x64": "sha256-SbbYoByOzrW56aZ1cg7V5Msk5GcoJkJlOqx/L9j69H8=",
-  "urlLinux_arm64": "https://files.pythonhosted.org/packages/c4/56/c5d5ad7e9ace7206f2400e6dce84b98e3387f9ccfb61a882edbb406299dc/headroom_ai-0.40.0-cp310-abi3-manylinux_2_28_aarch64.whl",
-  "sha256Linux_arm64": "sha256-FAgRBmv7ev6Ij0cb5KWHN1d5r53o3Xa7moEmtSuOkw8=",
-  "urlDarwin_x64": "https://files.pythonhosted.org/packages/ee/c3/9d5bc6fb41ed8a0da89be842fe8b24bfc22d5bd5cb3663950822a91b8eb1/headroom_ai-0.40.0-cp310-abi3-macosx_10_12_x86_64.whl",
-  "sha256Darwin_x64": "sha256-tzIJluoWW+4cvyUEArTYjf1LMKu+FIZkmG5BsK4Jygc=",
-  "urlDarwin_arm64": "https://files.pythonhosted.org/packages/f6/cf/2e7f237f343187bd4f1edba7f8117e6aa69953b46002a44f5136cc59f896/headroom_ai-0.40.0-cp310-abi3-macosx_11_0_arm64.whl",
-  "sha256Darwin_arm64": "sha256-97AYatXnbVyPdeXebFfgAWNyWOrXVIFXXMyk1XVX9fs="
+  "version": "0.41.0",
+  "urlLinux_x64": "https://files.pythonhosted.org/packages/e5/37/dfd7a44720ffb0d233384d1337efaf211e4e975dd5880fee57facb83c841/headroom_ai-0.41.0-cp310-abi3-manylinux_2_28_x86_64.whl",
+  "sha256Linux_x64": "sha256-9NteURmnOvPtlSscEMr/JDCDHYmesX2ZWidXSubmswY=",
+  "urlLinux_arm64": "https://files.pythonhosted.org/packages/4f/c5/13888daac2d77561423ffd6135c91f1a7799c66aba4232ad191fd2c44eed/headroom_ai-0.41.0-cp310-abi3-manylinux_2_28_aarch64.whl",
+  "sha256Linux_arm64": "sha256-BGMarACCYFiIWUZpvw6YNzYyEwfIx/UwZ2jnLWBqZa4=",
+  "urlDarwin_x64": "https://files.pythonhosted.org/packages/f2/d6/b40067368fd2c195b382d4734290e4ed2c9aed5b7af10521b77739975b29/headroom_ai-0.41.0-cp310-abi3-macosx_10_12_x86_64.whl",
+  "sha256Darwin_x64": "sha256-fkjTiWhGVYrrHYS+gkab5b6Lt++9ZWAeoGUFJEYLBn8=",
+  "urlDarwin_arm64": "https://files.pythonhosted.org/packages/d7/37/8e62a5ecb8c433230586c3dbcbbbcfb519adb72e8a91d69f4dad5e0b3184/headroom_ai-0.41.0-cp310-abi3-macosx_11_0_arm64.whl",
+  "sha256Darwin_arm64": "sha256-uELTbhYfnw0fxNVt4dhw4io+TQXJTSJy2aMGs49AYkI="
 }
