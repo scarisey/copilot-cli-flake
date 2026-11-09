@@ -1,7 +1,8 @@
 {
   stdenv,
   fetchurl,
-  autoPatchelfHook,
+  patchelf,
+  makeWrapper,
   lib,
 }:
 let
@@ -17,6 +18,8 @@ let
   };
 
   platform = platformMap.${stdenv.hostPlatform.system};
+
+  isLinux = stdenv.hostPlatform.isLinux;
 in
 
 stdenv.mkDerivation rec {
@@ -27,8 +30,28 @@ stdenv.mkDerivation rec {
     sha256 = platform.sha256;
   };
 
-  nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
-  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [ stdenv.cc.cc.lib ];
+  # NOTE: deliberately do *not* use autoPatchelfHook here.
+  #
+  # The Copilot CLI is a Node single-executable application (SEA) with a
+  # statically linked Node/OpenSSL whose dynamic symbols are exported by the
+  # main executable. Copilot's vendored `copilot-openssl` loader validates
+  # those symbols when it needs a native OpenSSL runtime (e.g. for proxy TLS
+  # certificate parsing).
+  #
+  # autoPatchelfHook adds an RPATH/RUNPATH to the executable. Doing so forces
+  # patchelf to grow `.dynstr`, which relocates it to an address outside the
+  # mapped PT_LOAD segments. The loader then aborts with:
+  #
+  #   cannot verify the selected libcrypto symbol table (... lie outside the
+  #   readable image); refusing an unverified OpenSSL runtime
+  #
+  # Patching only the ELF interpreter preserves the original section layout,
+  # so we do that manually and supply the runtime libraries (libstdc++ etc.)
+  # through LD_LIBRARY_PATH in the wrapper instead of an RPATH.
+  dontAutoPatchelf = true;
+
+  nativeBuildInputs = lib.optionals isLinux [ patchelf makeWrapper ];
+  buildInputs = lib.optionals isLinux [ stdenv.cc.cc.lib ];
 
   dontBuild = true;
   dontStrip = true;
@@ -36,8 +59,23 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
-    cp copilot $out/bin/copilot
-    chmod +x $out/bin/copilot
+
+    ${lib.optionalString isLinux ''
+      mkdir -p $out/libexec
+      install -m755 copilot $out/libexec/copilot
+
+      # Only set the interpreter: adding an RPATH breaks the SEA layout (see
+      # the comment above dontAutoPatchelf).
+      patchelf --set-interpreter ${stdenv.cc.bintools.dynamicLinker} $out/libexec/copilot
+
+      makeWrapper $out/libexec/copilot $out/bin/copilot \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ stdenv.cc.cc.lib ]}
+    ''}
+
+    ${lib.optionalString (!isLinux) ''
+      install -m755 copilot $out/bin/copilot
+    ''}
+
     runHook postInstall
   '';
 
