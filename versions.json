@@ -1,7 +1,7 @@
 {
-  "version": "1.0.110",
-  "sha256Linux_x64": "sha256-C5D6ZHp/PkFxM63O8zvYhzcuLrChUtBwm1Z0zKIl8Wk=",
-  "sha256Linux_arm64": "sha256-OFGVXekfEexZy6OF6pnUoTgkXkFvJ8UpexM5HazJwHQ=",
-  "sha256Darwin_x64": "sha256-qLew5N6FEqFstOP+64GnuYUZrlh6vNa3erD6EY8caZ4=",
-  "sha256Darwin_arm64": "sha256-t/yaHEJH/JepGAY2vl9nMnefgEN+yLQT3povBmEc8hs="
+  "version": "1.0.114",
+  "sha256Linux_x64": "sha256-vhFMIyEDUZe7HSOdRZ5KsyaxF4w89ovZY3of+uJci2o=",
+  "sha256Linux_arm64": "sha256-jDVQxCL1agQ0QrOBd6/JmBranyw2xusHacokDb9MH78=",
+  "sha256Darwin_x64": "sha256-lWOKPpEc+vsNKSE4BullYn7b7jiZL8GJwVVUHghg53U=",
+  "sha256Darwin_arm64": "sha256-Ue22lyGgWiQymI8mqvxKgnNTgSY00bjHE3egabklcWY="
 }
